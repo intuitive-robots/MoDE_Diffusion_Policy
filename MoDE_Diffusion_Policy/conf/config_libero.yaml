@@ -1,0 +1,71 @@
+defaults:
+  - callbacks: libero
+  - datamodule: libero_benchmark
+  - model: mode_agent # vlm_rectipy_agent # rectipy_agent_2 # rectipy_agent mode_agent
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+
+root_data_dir: /home/yagmurlu/code/MoDE_Calvin/dataset/task_ABC_D
+lang_folder: lang_clip_resnet50
+vis_clip_model_name: ViT-B/16
+clip_lang_model_name: ViT-B/32
+
+log_dir: ./logs
+slurm: false
+seed: 42
+device: 'cuda'
+batch_size: 256 # 38 # 128
+devices: 2
+goal_window_size: 1
+act_dim: 7
+proprio_dims: 9
+obs_dim: 512
+goal_dim: 512
+obs_seq_len: 1
+act_seq_len: 10
+multistep: ${act_seq_len}
+p_last_state: 0
+max_epochs: 50
+rollout_lh_skip_epochs: 29
+num_workers: 1
+benchmark_name: ${libero_benchmark} # calvin_abcd
+libero_benchmark: libero_10 # libero_goal # libero_spatial, libero_object, LIBERO_GOAL, LIBERO_90, LIBERO_10
+
+
+trainer:
+  gpus: ${devices}
+  precision: 32
+  max_epochs: ${max_epochs}
+  sync_batchnorm: False
+  accelerator: auto
+  limit_train_batches: 1000
+  limit_val_batches: 4
+  # gradient_clip_val: 1
+
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  save_dir: .
+  name: logger
+  group: mode
+  log_model: false
+  project: ${libero_benchmark}
+  entity: bennoq
+  id: ???
+
+
+hydra:
+  run:
+    dir: ${log_dir}/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${log_dir}/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.override_dirname}
+  job:
+    config:
+      override_dirname:
+        exclude_keys:
+          - log_dir
+          - datamodule.root_data_dir
+          - trainer.gpus
+          - datamodule.num_workers
+          - trainer.limit_train_batches
+          - trainer.limit_val_batches
