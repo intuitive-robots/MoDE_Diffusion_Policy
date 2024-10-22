@@ -8,86 +8,156 @@ import torch.nn as nn
 import torch.nn.functional as F
 import einops
 from einops.layers.torch import Rearrange
-from timm.models.vision_transformer import Mlp, RmsNorm, use_fused_attn
 
 logger = logging.getLogger(__name__)
 
-# custom timm attention class with fused attention that introduces causal attention
-class Attention(nn.Module):
-    fused_attn: bool
 
-    def __init__(
-            self,
-            dim: int,
-            num_heads: int = 8,
-            qkv_bias: bool = False,
-            qk_norm: bool = False,
-            attn_drop: float = 0.,
-            proj_drop: float = 0.,
-            norm_layer: nn.Module = nn.LayerNorm,
-            use_mask: str = 'none',  # 'none', 'causal', or 'custom'
-    ) -> None:
+# RMSNorm -- Better, simpler alternative to LayerNorm
+class RMSNorm(nn.Module):
+    def __init__(self, dim: int, eps: float = 1e-8) -> None:
         super().__init__()
-        assert dim % num_heads == 0, 'dim should be divisible by num_heads'
-        self.num_heads = num_heads
-        self.head_dim = dim // num_heads
-        self.scale = self.head_dim ** -0.5
-        self.fused_attn = use_fused_attn()
-        self.use_mask = use_mask
+        self.scale, self.eps = dim**-0.5, eps
+        self.g = nn.Parameter(torch.ones(dim))
 
-        self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
-        self.q_norm = norm_layer(self.head_dim) if qk_norm else nn.Identity()
-        self.k_norm = norm_layer(self.head_dim) if qk_norm else nn.Identity()
-        self.attn_drop = nn.Dropout(attn_drop)
-        self.proj = nn.Linear(dim, dim)
-        self.proj_drop = nn.Dropout(proj_drop)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        norm = torch.norm(x, dim=-1, keepdim=True) * self.scale
+        return x / norm.clamp(min=self.eps) * self.g
+    
+# SwishGLU -- A Gated Linear Unit (GLU) with the Swish activation; always better than GELU MLP!
+class SwishGLU(nn.Module):
+    def __init__(self, in_dim: int, out_dim: int) -> None:
+        super().__init__()
+        self.act, self.project = nn.SiLU(), nn.Linear(in_dim, 2 * out_dim)
 
-    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
-        B, N, C = x.shape
-        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
-        q, k, v = qkv.unbind(0)
-        q, k = self.q_norm(q), self.k_norm(k)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        projected, gate = self.project(x).tensor_split(2, dim=-1)
+        return projected * self.act(gate)
 
-        if self.fused_attn:
-            if self.use_mask == 'causal':
-                x = F.scaled_dot_product_attention(
-                    q, k, v,
-                    attn_mask=torch.triu(torch.ones(N, N, dtype=torch.bool, device=x.device), diagonal=1),
-                    dropout_p=self.attn_drop.p if self.training else 0.,
-                )
-            elif self.use_mask == 'custom':
-                if mask is None:
-                    raise ValueError("Custom mask option is selected but no mask is provided.")
-                x = F.scaled_dot_product_attention(
-                    q, k, v,
-                    attn_mask=mask,
-                    dropout_p=self.attn_drop.p if self.training else 0.,
-                )
-            else:
-                x = F.scaled_dot_product_attention(
-                    q, k, v,
-                    dropout_p=self.attn_drop.p if self.training else 0.,
-                )
+
+
+class Attention(nn.Module):
+    def __init__(
+        self, 
+        n_embd: int,
+        n_head: int,
+        attn_pdrop: float,
+        resid_pdrop: float,
+        block_size: int,
+        causal: bool = False,
+        bias=False,
+        qk_norm: bool = False,
+    ):
+        super().__init__()
+        assert n_embd % n_head == 0
+        self.key = nn.Linear(n_embd, n_embd)
+        self.query = nn.Linear(n_embd, n_embd)
+        self.value = nn.Linear(n_embd, n_embd)
+        self.c_proj = nn.Linear(n_embd, n_embd, bias=bias)
+        self.attn_dropout = nn.Dropout(attn_pdrop)
+        self.resid_dropout = nn.Dropout(resid_pdrop)
+        self.n_head = n_head
+        self.n_embd = n_embd
+        self.causal = causal
+        
+        self.flash = hasattr(torch.nn.functional, 'scaled_dot_product_attention')
+        if not self.flash and causal:
+            print("WARNING: Using slow attention. Flash Attention requires PyTorch >= 2.0")
+        # Dynamically compute causal mask instead of using a fixed bias buffer
+        self.block_size = block_size
+        self.qk_norm = qk_norm
+        # init qk norm if enabled
+        if self.qk_norm:
+            self.q_norm = RMSNorm(n_embd//self.n_head, eps=1e-6)
+            self.k_norm = RMSNorm(n_embd//self.n_head, eps=1e-6)
+        else: 
+            self.q_norm = self.k_norm = nn.Identity()
+
+
+
+    def forward(self, x, context=None, custom_attn_mask=None):
+        B, T, C = x.size()
+
+        if context is not None:
+            k = self.key(context).view(B, -1, self.n_head, C // self.n_head).transpose(1, 2)
+            q = self.query(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
+            v = self.value(context).view(B, -1, self.n_head, C // self.n_head).transpose(1, 2)
         else:
-            q = q * self.scale
-            attn = q @ k.transpose(-2, -1)
-            
-            if self.use_mask == 'causal':
-                causal_mask = torch.triu(torch.ones(N, N, dtype=torch.bool, device=attn.device), diagonal=1)
-                attn.masked_fill_(causal_mask.unsqueeze(0).unsqueeze(0), float('-inf'))
-            elif self.use_mask == 'custom':
-                if mask is None:
-                    raise ValueError("Custom mask option is selected but no mask is provided.")
-                attn.masked_fill_(mask.unsqueeze(1), float('-inf'))
-            
-            attn = attn.softmax(dim=-1)
-            attn = self.attn_drop(attn)
-            x = attn @ v
+            k = self.key(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
+            q = self.query(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
+            v = self.value(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
 
-        x = x.transpose(1, 2).reshape(B, N, C)
-        x = self.proj(x)
-        x = self.proj_drop(x)
-        return x
+        q = self.q_norm(q)
+        k = self.k_norm(k)
+
+        if self.flash:
+            y = torch.nn.functional.scaled_dot_product_attention(q, k, v, attn_mask=custom_attn_mask, dropout_p=self.attn_dropout.p if self.training else 0, is_causal=self.causal)
+        else:
+            att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
+
+            # Optimize custom attention masking
+            if custom_attn_mask is not None:
+                att = att.masked_fill(custom_attn_mask == 0, float('-inf'))
+            elif self.causal:
+                # Dynamically compute causal mask based on current sequence length T
+                causal_mask = torch.tril(torch.ones(T, T, device=x.device)).view(1, 1, T, T)
+                att = att.masked_fill(causal_mask == 0, float('-inf'))
+
+            att = F.softmax(att, dim=-1)
+            att = self.attn_dropout(att)
+            y = att @ v
+
+        y = y.transpose(1, 2).contiguous().view(B, T, C)
+        y = self.resid_dropout(self.c_proj(y))
+        return y
+
+
+
+class Mlp(nn.Module):
+    def __init__(
+            self, 
+            n_embd: int,
+            bias: bool,
+            use_swish: bool = True,
+            use_relus: bool = False,
+            dropout: float = 0,
+            identity_only: bool = False,
+            output_dim: Optional[int] = None
+        ):
+        super().__init__()
+        self.identity_only = identity_only
+        layers = []
+
+        if output_dim is not None:
+            n_embed_final = output_dim
+        else:
+            n_embed_final = n_embd
+        
+        if identity_only:
+            # Initialize as identity layers
+            identity_layer = nn.Linear(n_embd, n_embd, bias=False)
+            nn.init.eye_(identity_layer.weight)  # Set weights to identity matrix
+            layers.append(identity_layer)
+        else:
+            if use_swish:
+                layers.append(SwishGLU(n_embd, 4 * n_embd))
+            else:
+                layers.append(nn.Linear(n_embd, 4 * n_embd, bias=bias))
+                if use_relus:
+                    layers.append(nn.ReLU())
+                else:
+                    layers.append(nn.GELU())
+            layers.append(nn.Dropout(dropout))
+            layers.append(nn.Linear(4 * n_embd, n_embed_final, bias=bias))
+        
+        self.mlp = nn.Sequential(*layers)
+        
+        if identity_only:
+            # Freeze the parameters so they are not updated during training
+            for param in self.mlp.parameters():
+                param.requires_grad = False
+
+    def forward(self, x):
+        return self.mlp(x)
     
 
 
@@ -135,14 +205,10 @@ class RouterCond(nn.Module):
         else:
             input_dim = hidden_states
 
-        return Mlp(
-            in_features=input_dim,
-            hidden_features=2 * hidden_states,
-            out_features=self.num_experts,
-            act_layer=nn.GELU,
-            norm_layer=None,
+        return Mlp(input_dim,
+                   output_dim=self.num_experts,
             bias=True,
-            drop=0.,
+            dropout=0.,
         )
 
     def forward(self, inputs: torch.Tensor, cond: Optional[torch.Tensor] = None):
@@ -185,7 +251,7 @@ class RouterCond(nn.Module):
                 noise_embed = cond[i]
                 key = tuple(noise_embed.cpu().numpy().flatten().tolist())
 
-                dummy_input = torch.zeros(1, 1, self.router.fc1.in_features).to(next(self.parameters()).device)
+                dummy_input = torch.zeros(1, 1, cond.shape[-1]).to(next(self.parameters()).device)
                 if self.cond_router:
                     if self.router_context_cond_only:
                         router_inputs = noise_embed.unsqueeze(0)
@@ -337,13 +403,15 @@ class NoiseBlockMoE(nn.Module):
             attn_arg: str = 'causal',
         ):
         super().__init__()
-        self.ln_1 = RmsNorm(n_embd, eps=1e-6)
+        self.ln_1 = RMSNorm(n_embd, eps=1e-6)
         self.attn = Attention(
             n_embd, 
             n_heads, 
             qk_norm=True,
-            attn_drop=attn_pdrop,
-            norm_layer=RmsNorm,
+            attn_pdrop=attn_pdrop,
+            resid_pdrop=0,
+            block_size=100,
+            #  norm_layer=RMSNorm,
         )
         self.use_cross_attention = use_cross_attention
         if self.use_cross_attention:
@@ -351,13 +419,12 @@ class NoiseBlockMoE(nn.Module):
                 n_embd, 
                 n_heads, 
                 qk_norm=True,
-                attn_drop=attn_pdrop,
-                norm_layer=RmsNorm,
-                use_mask=attn_arg,
+                attn_pdrop=attn_pdrop,
+                resid_pdrop=0,
             )
-            self.ln_3 = RmsNorm(n_embd, eps=1e-6) 
+            self.ln_3 = RMSNorm(n_embd, eps=1e-6) 
 
-        self.ln_2 = RmsNorm(n_embd, eps=1e-6) 
+        self.ln_2 = RMSNorm(n_embd, eps=1e-6) 
         self.logits = None
         
         self.cond_router = cond_router
@@ -386,16 +453,14 @@ class NoiseBlockMoE(nn.Module):
             {
                 f"expert_{i}": Mlp(
                     n_embd,  # in_features
-                    4*n_embd,  # hidden_features
-                    n_embd,  # out_features
-                    act_layer=lambda: nn.GELU(approximate="tanh"),
-                    drop=mlp_pdrop
+                    bias=False,
+                    dropout=mlp_pdrop
                 )
                 for i in range(num_experts_router - int(identity_expert))
             }
         )
         if self.use_shared_expert:
-            self.shared_mlp = Mlp(n_embd, 4*n_embd, n_embd, lambda: nn.GELU(approximate="tanh"), drop=mlp_pdrop, )
+            self.shared_mlp = Mlp(n_embd, bias=False, dropout=mlp_pdrop)
 
         if identity_expert:
             self.experts[f"expert_{num_experts_router}"] = nn.Identity()
@@ -411,14 +476,14 @@ class NoiseBlockMoE(nn.Module):
 
     def forward(self, x, c, context=None, custom_attn_mask=None):
         # Apply self-attention with conditional input
-        x = x + self.attn(self.ln_1(x) + c, mask=custom_attn_mask)
+        x = x + self.attn(self.ln_1(x) + c, custom_attn_mask=custom_attn_mask)
 
         # Apply cross-attention if enabled and context is provided
         if self.use_cross_attention and context is not None:
             if self.noise_in_cross_attention:
-                x = x + self.cross_att(self.ln_3(x) + c, context, mask=custom_attn_mask)
+                x = x + self.cross_att(self.ln_3(x) + c, context, custom_attn_mask=custom_attn_mask)
             else:
-                x = x + self.cross_att(self.ln_3(x), context, mask=custom_attn_mask)
+                x = x + self.cross_att(self.ln_3(x), context, custom_attn_mask=custom_attn_mask)
         x = self.ln_2(x)
 
         # Check if we're in inference mode and have a router cache
@@ -595,7 +660,8 @@ class MoDeDiT(nn.Module):
         self.device = device
         self.use_proprio = use_proprio
         self.obs_dim = obs_dim
-        self.sigma_emb = NoiseEmbedding(embed_dim)
+        # self.sigma_emb =  NoiseEmbedding(embed_dim)
+        self.sigma_emb = nn.Linear(1, embed_dim)
         self.sigma_linear = nn.Linear(embed_dim, embed_dim, bias=False)
         seq_size = goal_seq_len + obs_seq_len - 1 + action_seq_len
         self.tok_emb = nn.Linear(obs_dim, embed_dim, bias=False)
@@ -633,12 +699,12 @@ class MoDeDiT(nn.Module):
                     attn_arg=attn_arg,
                 )
             )
-        self.ln = RmsNorm(embed_dim, eps=1e-6)
+        self.ln = RMSNorm(embed_dim, eps=1e-6)
         self.linear_output = linear_output
         if self.linear_output:
             self.out = nn.Linear(embed_dim, action_dim)
         else:
-            self.out = Mlp(embed_dim, embed_dim, action_dim, nn.GELU(approximate="tanh"), drop=mlp_pdrop, norm_layer=None)
+            self.out = Mlp(embed_dim, bias=False, dropout=mlp_pdrop)
 
         self.goal_seq_len = goal_seq_len
         self.action_seq_len = action_seq_len
@@ -673,11 +739,6 @@ class MoDeDiT(nn.Module):
         if len(goals.shape) == 2:
             goals = einops.rearrange(goals, 'b d -> b 1 d')
         
-        # if self.training and self.cond_mask_prob > 0:
-        #    goals = self.mask_cond(goals)
-        # if uncond:
-        #    goals = torch.zeros_like(goals).to(self.device)
-        
         state_embed = self.tok_emb(states['state_images'])
         if 'robot_obs' in states and self.use_proprio:
             proprio_embed = self.process_state_obs(states['robot_obs'].to(goals.dtype))
@@ -710,7 +771,7 @@ class MoDeDiT(nn.Module):
         # if goal_conditioned is False we only have the obs sequence
         input_seq = self.build_input_seq(state_x, action_x, goal_x, emb_t, proprio_x)
 
-        input_seq = self.mask_cond(input_seq)
+        # input_seq = self.mask_cond(input_seq)
 
         if self.use_custom_attn_mask:
             custom_mask = self.create_custom_mask(input_seq.shape[1])
