@@ -1,4 +1,4 @@
-# MoDE_Calvin
+# MoDE_Diffusion_Policy
 
 Add paper link and more here
 
@@ -6,7 +6,7 @@ Add paper link and more here
 To begin, clone this repository locally
 ```bash
 git clone --recurse-submodules git@github.com:mbreuss/MoDE_Diffusion_Policy.git
-export mode_ROOT=$(pwd)/MoDE_Calvin
+export mode_ROOT=$(pwd)/MoDE_Diffusion_Policy
 
 ```
 Install requirements
