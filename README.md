@@ -13,8 +13,8 @@ Install requirements
 (Note we provided a changed verison of pyhash, given numerous problems when installing it manually)
 ```bash
 cd $mode_ROOT
-conda create -n mode_env python=3.8
-conda activate mode_env
+conda create -n mode_dp python=3.9
+conda activate mode_dp
 cd calvin_env/tacto
 pip install -e .
 cd ..
