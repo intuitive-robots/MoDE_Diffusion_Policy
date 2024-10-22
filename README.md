@@ -25,9 +25,6 @@ cd pyhash-0.9.3
 python setup.py build
 python setup.py install
 cd ..
-cd transformer_blocks
-pip install -e .
-cd ..
 cd LIBERO
 pip install -r requirements.txt
 pip install -e .
