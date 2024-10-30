@@ -1,4 +1,0 @@
-include README.md
-include LICENSE.txt
-include requirements.txt
-recursive-include src *.h *.c *.cc *.cpp
