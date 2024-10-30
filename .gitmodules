@@ -1,6 +1,0 @@
-[submodule "calvin_env"]
-	path = calvin_env
-	url = git@github.com:mees/calvin_env.git
-[submodule "LIBERO"]
-	path = LIBERO
-	url = https://github.com/Lifelong-Robot-Learning/LIBERO

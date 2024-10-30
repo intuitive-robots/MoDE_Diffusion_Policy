@@ -1,0 +1,71 @@
+<div id="fpl-perspective">
+    <div id="fpl-videos">
+        {% assign n = site.static_files | size %}
+        {% assign videos = site.static_files | sample: n %}
+        {% for video in videos %}
+            {% if video.path contains 'video/real_robot_50' %}
+            {% if video.extname == ".mp4" %}
+                <video width="100%" height="100%" autoplay muted loop playsinline>
+                    <source src="{{ video.path | relative_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<!-- <h1 class="title is-1 publication-title p-3" id="fpl-title">BESO</h1> -->
+
+<script>
+    const unif = () => Math.random()
+    const beta = () => Math.sin(unif()*Math.PI/2)**2
+    // random rot each time
+    root = document.querySelector(':root')
+    root.style.setProperty('--fpl-rotX', Math.floor(beta() * 20) - 10 + 'deg') // -10 to 10
+    root.style.setProperty('--fpl-rotY', Math.floor(beta() * 30) - 15 + 'deg') // -15 to 15
+
+</script>
+<style>
+    :root {
+        --fpl-rotX: 10deg;
+        --fpl-rotY: -15deg;
+    }
+    @keyframes resetTransform {
+        0% {
+            transform: rotateX(var(--fpl-rotX)) rotateY(var(--fpl-rotY)) translateZ(400px);
+        }
+        100% {
+            transform: none; /* Resetting to default state */
+        }
+    }
+
+    #fpl-perspective {
+        perspective: 500px;
+        perspective-origin: center;
+        max-width:100vw;
+        max-height:100vh;
+        overflow: hidden;
+    }
+    #fpl-videos {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+
+        transform: rotateX(var(--fpl-rotX)) rotateY(var(--fpl-rotY)) translateZ(400px);
+        animation: resetTransform 8s ease-in-out 1s forwards;
+    }
+    @media (max-width: 720px) {
+        #fpl-videos {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(25, 1fr);
+        }
+    }
+    #fpl-title {
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        transform: translate(-50%, 50%);
+    }
+</style>

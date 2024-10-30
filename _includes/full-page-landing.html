@@ -1,0 +1,38 @@
+<section id="full-page-landing">
+    {% if include.in_include %}
+        {% include {{ include.in_include }} %}
+    {% else %}
+        {{ include.content }}
+    {% endif %}
+    <script>
+    const fpl = document.getElementById('full-page-landing');
+    let lastScrollTop = Infinity;
+    const handler = function() {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        // if (scrollTop !== lastScrollTop && lastScrollTop !== Infinity) {
+        if (scrollTop > lastScrollTop) {
+            // console.log(scrollTop, lastScrollTop);
+            fpl.classList.add('hidden');
+            window.removeEventListener('scroll', handler);
+        }
+        lastScrollTop = scrollTop;
+    }
+    window.addEventListener('scroll', handler);
+    </script>
+    <style>
+        #full-page-landing {
+            height: 100vh;
+            display: block;
+            max-height: 100vh;
+            transition: height 1s, display 1s;
+            transition-behavior: allow-discrete;
+            overflow: hidden;
+            position: relative;
+        }
+        #full-page-landing.hidden {
+            height: 0vh;
+            display: none;
+        }
+    </style>
+</section>
