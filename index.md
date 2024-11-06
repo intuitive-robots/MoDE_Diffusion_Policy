@@ -2,13 +2,13 @@
 layout: project_page
 permalink: /
 
-title: "Variational Distillation of Diffusion Policies into Mixture of Experts"
-authors: Hongyi Zhou, Denis Blessing, Ge Li, Onur Celik, Xiaogang Jia, <a href="https://alr.iar.kit.edu/21_65.php">Gerhard Neumann</a>, <a href="https://rudolf.intuitive-robots.net/">Rudolf Lioutikov</a>
-affiliations: <a href="https://www.irl.iar.kit.edu/">KIT Intuitive Robots Lab</a>
-venue: "NeurIPS 2024"
-paper: https://arxiv.org/abs/2406.12538
+title: "Efficient Diffusion Transformer Policies with Mixture of Expert Denoisers for Multitask Learning"
+authors: Anonymous Authors
+affiliations: Anonymous
+# venue: "NeurIPS 2024"
+# paper: https://arxiv.org/abs/2406.12538
 # video:
-code: https://github.com/VDD-Anonymous/Variational-Diffusion-Distillation
+# code: https://github.com/VDD-Anonymous/Variational-Diffusion-Distillation
 # data:
 # title-bg-landing-include: fpl-video.html
 ---
@@ -18,26 +18,24 @@ code: https://github.com/VDD-Anonymous/Variational-Diffusion-Distillation
     <div class="column is-four-fifths">
         <h2>Abstract</h2>
         <div class="content has-text-justified">
-This work introduces Variational Diffusion Distillation (VDD), a novel method
-that distills denoising diffusion policies into Mixtures of Experts (MoE) through
-variational inference. Diffusion Models are the current state-of-the-art in generative
-modeling due to their exceptional ability to accurately learn and represent complex,
-multi-modal distributions. This ability allows Diffusion Models to replicate the
-inherent diversity in human behavior, making them the preferred models in behavior
-learning such as Learning from Human Demonstrations (LfD). However, diffusion
-models come with some drawbacks, including the intractability of likelihoods and
-long inference times due to their iterative sampling process. The inference times,
-in particular, pose a significant challenge to real-time applications such as robot
-control. In contrast, MoEs effectively address the aforementioned issues while
-retaining the ability to represent complex distributions but are notoriously difficult
-to train. VDD is the first method that distills pre-trained diffusion models into MoE
-models, and hence, combines the expressiveness of Diffusion Models with the
-benefits of Mixture Models. Specifically, VDD leverages a decompositional upper
-bound of the variational objective that allows the training of each expert separately,
-resulting in a robust optimization scheme for MoEs. VDD demonstrates across
-nine complex behavior learning tasks, that it is able to: i) accurately distill complex
-distributions learned by the diffusion model, ii) outperform existing state-of-the-art
-distillation methods, and iii) surpass conventional methods for training MoE.
+Diffusion Policies have become widely used in Imitation Learning, offering several
+appealing properties, such as generating multimodal and discontinuous behavior.
+As models are becoming larger to capture more complex capabilities, their compu-
+tational demands increase, as shown by recent scaling laws. Therefore, continuing
+with the current architectures will present a computational roadblock. To address
+this gap, we propose Mixture-of-Denoising Experts (MoDE) as a novel policy for
+Imitation Learning. MoDE surpasses current state-of-the-art Transformer-based
+Diffusion Policies while enabling parameter-efficient scaling, reducing the infer-
+ence cost significantly. To achieve this, MoDE uses sparse experts combined with a
+novel routing strategy that conditions the expert selection on the current noise level
+of the denoising process. This is combined with a noise-conditioned self-attention
+mechanism for further improvements. MoDE achieves state-of-the-art performance
+across 134 tasks in four established imitation learning benchmarks (CALVIN and
+LIBERO). It surpasses both CNN-based and Transformer Diffusion Policies by
+an average of 20% in all settings, while using 40% fewer FLOPs and fewer ac-
+tive parameters. Furthermore, we conduct comprehensive ablations on MoDE’s
+components, providing insights for designing efficient and scalable Transformer
+architectures for Diffusion Policies.
         </div>
     </div>
 </div>
@@ -45,77 +43,52 @@ distillation methods, and iii) surpass conventional methods for training MoE.
 ## Method Overview
 
 <div class="columns is-centered">
-    <img src="./static/image/overview.png" alt="VDD" class="column is-four-fifths">
+    <img src="./static/image/overview.png" alt="MoDE" class="column is-four-fifths">
 </div>
 
-VDD distills a diffusion policy into an MoE. Learning from Demonstrations (LfD) is challenging due to the multimodality
-of human behaviour. For example, tele-operated demonstrations of an avoiding task often contain
-multiple solutions. A diffusion policy can predict high quality actions but relies on an
-iterative sampling process from noise to data, shown as the red arrows in the figure above. VDD uses the score
-function to distill a diffusion policy into an MoE, unifying the advantages of both approaches.
+MoDE uses a transformer with
+causal masking from top to bottom. Each transformer block uses noise-conditional self-attention
+and is followed by a noise-conditioned router, that distributes tokens to specialized expert models
+conditioned on the current noise level. Each expert is a simple MLP with Swish-GLU activation.
 
 ---
 
-## Training of VDD in a 2D Toy Task
+### Mixture-of-Experts for Enhanced Efficiency in Diffusion Policies
 
-<div class="column is-one-third is-pulled-right p-0">
-    <video width="100%" autoplay muted loop playsinline>
-        <source src="./static/video/toy_task_animation.mp4" type="video/mp4">
-    </video>
-</div>
+The Mixture-of-Denoising Experts (MoDE) policy presents a groundbreaking approach for handling the high computational cost in imitation learning diffusion policies. Traditional diffusion models require vast computational resources, making them less feasible for real-time robotics. MoDE addresses this limitation by utilizing a sparse mixture-of-experts (MoE) model, where only a subset of experts is activated based on the noise level in each stage of the denoising process. This selective activation significantly reduces the model’s active parameters and floating-point operations (FLOPs), lowering inference costs by 40% compared to conventional transformer-based diffusion policies. This advance makes MoDE not only a powerful tool for complex imitation learning tasks but also a computationally efficient choice for real-world applications requiring high-speed decision-making, such as robotics​.
 
-Illustration of training VDD using the score function for a fixed state in a 2D toy task.
-The probability density of the distribution is depicted by the color map. The score function is shown
-by the gradient field, visualized as white arrows. From (b) to (f), we initialize and train VDD until
-convergence. We initialize 8 components, each represented by an orange circle. These components
-are driven by the score function to match the data distribution and avoid overlapping modes by
-utilizing the learning objective in Eq. 11 in the paper. Eventually, they align with all data modes.
+### Noise-Conditioned Routing and Self-Attention in Diffusion Transformers
+
+MoDE introduces a novel noise-conditioned routing mechanism, paired with a noise-conditioned self-attention framework, optimizing how tokens are allocated to specialized experts during the denoising process. This design leverages the current noise level to guide token routing, allowing the model to adjust dynamically and enhance denoising at each stage. By conditioning both the routing and self-attention mechanisms on noise, MoDE achieves a refined action generation across a wide range of imitation learning tasks, demonstrating a 20% improvement over previous diffusion models. This innovative noise-aware strategy not only improves performance but also reduces the risk of expert collapse, where experts become redundant, by ensuring the router’s effective distribution of tokens across experts based on task demands​.
+
+## MoDE Excels in Long-Horizon Multi-Task Learning on LIBERO Benchmark
+
+MoDE achieves the highest average performance in both LIBERO-10 (Long) and LIBERO-90 benchmarks, while the QueST baseline is
+the second best in the LIBERO-90 setting and the CNN-architecture is second best in the long horizon
+setting. These results demonstrate MoDE’s ability to learn long-horizon tasks with high accuracy.
+The performance gap is more pronounced in the challenging LIBERO-10 experiment, where MoDE
+is the first policy to achieve an over 90% success rate. Furthermore, MoDE surpasses prior best
+Diffusion baselines by an average of 16% in both settings, all while maintaining its computational
+advantage. This showcases MoDE’s ability to achieve state-of-the-art performance with a more
+efficient use of computational resources.
 
 <div class="columns is-centered">
-    <img src="./static/image/toy_task_ov.png" alt="VDD training in a 2D Toy Task" class="column is-full">
+    <div class="column is-four-fifths">
+        <img src="./static/image/libero-fig.png" alt="Libero Results">
+    </div>
 </div>
 
-## Competitive Distillation Performance in Imitation Learning Datasets
+## State-of-the-Art Performance on CALVIN Benchmark with Minimal Computational Resources
 
-The results on the widely recognized imitation learning datasets Relay Kitchen and XArm Block Push indicate that VDD achieves a performance comparable to CD in both tasks, with
-slightly better outcomes in the block push dataset. An additional interesting finding is that BESO,
-with only one denoising step (BESO-1), already proves to be a strong baseline in these tasks, as
-the original models outperformed the distillation results in both cases. We attribute this interesting
-observation to the possibility that the Relay Kitchen and the XArm Block Push tasks are comparably
-easy to solve and do not provide diverse, multi-modal data distributions. We therefore additionally
-evaluate the methods on a more recently published dataset (D3IL) which is explicitly generated
-for complex robot imitation learning tasks.
+On the CALVIN benchmark, MoDE achieved exceptional results, excelling at complex, sequential robotic tasks that require language-conditioned responses. In the ABCD→D challenge, MoDE outperformed both pre-trained large-scale models and traditional diffusion policies. It achieved an average sequence length of 4.30 over long instruction chains, surpassing models like RoboFlamingo and GR-1. Additionally, MoDE maintained high computational efficiency, requiring fewer FLOPs during inference (7.03 vs 7.93 GFLOPs for GR-1) despite its larger parameter footprint, making it an optimal choice for multi-task learning in robotics.
 
-|                | **DDPM** | **BESO** | **DDPM-1** | **BESO-1** | **CD**             | **CTM**            | **VDD-DDPM (ours)**  | **VDD-BESO (ours)** |
-|----------------|----------|----------|------------|------------|--------------------|--------------------|----------------------|----------------------|
-| **Kitchen**     | 3.35     | 4.06     | 0.22       | 4.02       | 3.87 ± 0.05        | **3.89 ± 0.11**     | 3.24 ± 0.12          | 3.85 ± 0.10          |
-| **Block Push**  | 0.96     | 0.96     | 0.09       | 0.94       | 0.89 ± 0.05        | 0.89 ± 0.04        | 0.93 ± 0.03          | **0.91 ± 0.03**    |
-| **Avoiding**    | 0.94     | 0.96     | 0.09       | 0.84       | 0.82 ± 0.05        | 0.93 ± 0.02        | 0.92 ± 0.02          | **0.95 ± 0.01**    |
-| **Aligning**    | 0.85     | 0.85     | 0.00       | 0.93       | **0.94 ± 0.08**  | 0.81 ± 0.11        | 0.70 ± 0.07          | 0.86 ± 0.04          |
-| **Pushing**     | 0.74     | 0.78     | 0.00       | 0.70       | 0.66 ± 0.05        | 0.80 ± 0.07        | 0.61 ± 0.04          | **0.85 ± 0.02**    |
-| **Stacking-1**  | 0.89     | 0.91     | 0.00       | 0.75       | 0.69 ± 0.06        | 0.54 ± 0.17        | 0.81 ± 0.08          | **0.85 ± 0.02**    |
-| **Stacking-2**  | 0.68     | 0.70     | 0.00       | 0.53       | 0.46 ± 0.11        | 0.30 ± 0.09        | **0.60 ± 0.07**    | 0.57 ± 0.06          |
-| **Sorting (Image)**  | 0.69 | 0.70 | 0.20       | 0.68       | 0.71 ± 0.07        | 0.70 ± 0.07        | **0.80 ± 0.04**    | 0.76 ± 0.04          |
-| **Stacking (Image)** | 0.58 | 0.66 | 0.00       | 0.58       | 0.63 ± 0.01        | 0.59 ± 0.10        | **0.78 ± 0.02**    | 0.60 ± 0.04          |
-
-
-## Comparison with MoE learning from scratch
-
-Using VDD consistently outperforms direct MoE learning approachesm, using EM-GPT and IMC-GPT as baselines.
-
-| **Environments**    | **EM-GPT**      | **IMC-GPT**      | **VDD-DDPM**  | **VDD-BESO**      |
-|---------------------|------------------|------------------|------------------|-------------------|
-|                     |                  |                  | (Ours)           | (Ours)            |
-| **Avoiding**        | 0.65 ± 0.18      | 0.75 ± 0.08      | 0.92 ± 0.02      | **0.95 ± 0.01**   |
-| **Aligning**        | 0.78 ± 0.04      | 0.83 ± 0.02      | 0.70 ± 0.07      | **0.86 ± 0.04**   |
-| **Pushing**         | 0.16 ± 0.07      | 0.76 ± 0.04      | 0.61 ± 0.04      | **0.85 ± 0.02**   |
-| **Stacking-1**      | 0.58 ± 0.06      | 0.54 ± 0.05      | 0.81 ± 0.08      | **0.83 ± 0.09**   |
-| **Stacking-2**      | 0.34 ± 0.07      | 0.29 ± 0.07      | **0.60 ± 0.07**  | 0.57 ± 0.06       |
-| **Sorting (image)** | 0.69 ± 0.02      | 0.74 ± 0.04      | **0.80 ± 0.04**  | 0.76 ± 0.03       |
-| **Stacking (image)**| 0.04 ± 0.03      | 0.39 ± 0.10      | **0.78 ± 0.02**  | 0.60 ± 0.04       |
-| **Relay Kitchen**   | 3.62 ± 0.10      | 3.67 ± 0.05      | 3.24 ± 0.12      | **3.85 ± 0.10**   |
-| **Block Push**      | 0.88 ± 0.04      | 0.89 ± 0.04      | **0.93 ± 0.03**  | 0.91 ± 0.03       |
-
+| **Method**        | **Active Params (Million)** | **1 Instruction** | **2 Instructions** | **3 Instructions** | **4 Instructions** | **5 Instructions** | **Avg. Length** |
+|-------------------|-----------------------------|-------------------|--------------------|--------------------|--------------------|--------------------|-----------------|
+| **MoDE**          | 277                         | 96.6%            | 90.6%             | 86.6%             | 80.9%             | 75.5%             | 4.30            |
+| GR-1              | 130                         | 94.9%            | 89.6%             | 84.4%             | 78.9%             | 73.1%             | 4.21            |
+| RoboFlamingo      | 1000                        | 96.4%            | 89.6%             | 82.4%             | 74.0%             | 66.0%             | 4.09            |
+| Diff-P-CNN        | 321                         | 86.3%            | 72.7%             | 60.1%             | 51.2%             | 41.7%             | 3.16            |
+| Diff-P-T          | 194                         | 78.3%            | 53.9%             | 33.8%             | 20.4%             | 11.3%             | 1.98            |
 
 
 <!-- ## BibTeX
