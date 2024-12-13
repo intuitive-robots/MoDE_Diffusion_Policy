@@ -5,7 +5,7 @@ permalink: /
 title: "Efficient Diffusion Transformer Policies with Mixture of Expert Denoisers for Multitask Learning"
 authors: <a href="https://mbreuss.github.io/moritzreuss/">Moritz Reuss</a><sup>1</sup>, <a href="https://jyopari.github.io/aboutMe.html">Jyothish Pari</a><sup>1</sup>, <a href="https://people.csail.mit.edu/pulkitag/">Pulkit Agrawal</a><sup>2</sup>, <a href="http://rudolf.intuitive-robots.net/">Rudolf Lioutikov</a><sup>1</sup>
 affiliations: <sup>1</sup>Intuitive Robots Lab, KIT <sup>2</sup>MIT CSAIL
-venue: "ICLR 2024"
+# venue: "ICLR 2025"
 # paper: https://arxiv.org/abs/2406.12538
 # video:
 # code: https://github.com/VDD-Anonymous/Variational-Diffusion-Distillation
@@ -58,7 +58,13 @@ The Mixture-of-Denoising Experts (MoDE) policy presents a groundbreaking approac
 
 ### Noise-Conditioned Routing and Self-Attention in Diffusion Transformers
 
-MoDE introduces a novel noise-conditioned routing mechanism, paired with a noise-conditioned self-attention framework, optimizing how tokens are allocated to specialized experts during the denoising process. This design leverages the current noise level to guide token routing, allowing the model to adjust dynamically and enhance denoising at each stage. By conditioning both the routing and self-attention mechanisms on noise, MoDE achieves a refined action generation across a wide range of imitation learning tasks, demonstrating a 20% improvement over previous diffusion models. This innovative noise-aware strategy not only improves performance but also reduces the risk of expert collapse, where experts become redundant, by ensuring the router’s effective distribution of tokens across experts based on task demands​.
+MoDE introduces a novel noise-conditioned routing mechanism, paired with a noise-conditioned self-attention framework, optimizing how tokens are allocated to specialized experts during the denoising process. By conditioning both the routing and self-attention mechanisms on noise, the model dynamically adjusts token routing, enhancing denoising at each stage and achieving a refined action generation across a wide range of imitation learning tasks. This innovative strategy demonstrates a 20% improvement over previous diffusion models and reduces the risk of expert collapse by ensuring effective distribution of tokens across experts based on task demands.
+
+<div class="columns is-centered">
+    <img src="./static/image/caching.png" alt="MoDE" class="column is-four-fifths">
+</div>
+
+A key advantage of our noise-conditioned design is the deterministic routing path at each noise level, which can be precomputed. By determining the chosen experts ahead of time, the selected expert MLPs can be fused into a single, composite MLP, effectively reducing computation costs. This fused MLP enables parallel execution, substantially decreasing network latency and streamlining memory access patterns by eliminating the need for dynamically invoking each expert. Our caching strategy further reduces FLOPs overhead by over 80% compared to standard MoE rollouts, making the model twice as fast during inference.
 
 ## MoDE Excels in Long-Horizon Multi-Task Learning on LIBERO Benchmark
 
