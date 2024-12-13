@@ -3,12 +3,12 @@
         {% assign n = site.static_files | size %}
         {% assign videos = site.static_files | sample: n %}
         {% for video in videos %}
-            {% if video.path contains 'video/real_robot_50' %}
+            {% if video.path contains 'calvin' %}
             {% if video.extname == ".mp4" %}
-                <video width="100%" height="100%" autoplay muted loop playsinline>
-                    <source src="{{ video.path | relative_url }}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+            <video width="100%" height="100%" autoplay muted loop playsinline>
+                <source src="{{ video.path | relative_url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
             {% endif %}
             {% endif %}
         {% endfor %}
@@ -48,8 +48,8 @@
     }
     #fpl-videos {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        grid-template-rows: repeat(8, 1fr);
+        grid-template-columns: repeat(9, 1fr);
+        grid-template-rows: repeat(5, 1fr);
 
         transform: rotateX(var(--fpl-rotX)) rotateY(var(--fpl-rotY)) translateZ(400px);
         animation: resetTransform 8s ease-in-out 1s forwards;

@@ -3,16 +3,15 @@ layout: project_page
 permalink: /
 
 title: "Efficient Diffusion Transformer Policies with Mixture of Expert Denoisers for Multitask Learning"
-authors: Anonymous Authors
-affiliations: Anonymous
-# venue: "NeurIPS 2024"
+authors: <a href="https://mbreuss.github.io/moritzreuss/">Moritz Reuss</a><sup>1</sup>, <a href="https://jyopari.github.io/aboutMe.html">Jyothish Pari</a><sup>1</sup>, <a href="https://people.csail.mit.edu/pulkitag/">Pulkit Agrawal</a><sup>2</sup>, <a href="http://rudolf.intuitive-robots.net/">Rudolf Lioutikov</a><sup>1</sup>
+affiliations: <sup>1</sup>Intuitive Robots Lab, KIT <sup>2</sup>MIT CSAIL
+venue: "ICLR 2024"
 # paper: https://arxiv.org/abs/2406.12538
 # video:
 # code: https://github.com/VDD-Anonymous/Variational-Diffusion-Distillation
 # data:
-# title-bg-landing-include: fpl-video.html
+title-bg-landing-include: fpl-video.html
 ---
-
 
 <div class="columns is-centered has-text-centered">
     <div class="column is-four-fifths">
@@ -78,18 +77,89 @@ efficient use of computational resources.
     </div>
 </div>
 
-## State-of-the-Art Performance on CALVIN Benchmark with Minimal Computational Resources
+## State-of-the-Art Performance on CALVIN Benchmark
 
-On the CALVIN benchmark, MoDE achieved exceptional results, excelling at complex, sequential robotic tasks that require language-conditioned responses. In the ABCD→D challenge, MoDE outperformed both pre-trained large-scale models and traditional diffusion policies. It achieved an average sequence length of 4.30 over long instruction chains, surpassing models like RoboFlamingo and GR-1. Additionally, MoDE maintained high computational efficiency, requiring fewer FLOPs during inference (7.03 vs 7.93 GFLOPs for GR-1) despite its larger parameter footprint, making it an optimal choice for multi-task learning in robotics.
+In our experiments on the demanding CALVIN Language-Skills Benchmark, MoDE consistently outperforms all baselines. For instance, in the ABCD→D evaluation, MoDE without pretraining achieves a 4.30 average sequence length out of 5 possible tasks, surpassing RoboFlamingo (4.09) and GR-1 (4.21), both of which utilize large-scale pretraining. With pretraining, MoDE reaches an even higher average length of 4.39, setting a new state-of-the-art result. Similarly, in the more challenging ABC→D zero-shot test, MoDE without pretraining achieves an average sequence length of 3.39, substantially improving upon Diff-P-CNN’s 1.35 and GR-1’s 3.06. With pretraining, MoDE achieves an average of 3.98 in the zero-shot scenario, outpacing other methods and demonstrating strong generalization capabilities.
 
-| **Method**        | **Active Params (Million)** | **1 Instruction** | **2 Instructions** | **3 Instructions** | **4 Instructions** | **5 Instructions** | **Avg. Length** |
-|-------------------|-----------------------------|-------------------|--------------------|--------------------|--------------------|--------------------|-----------------|
-| **MoDE**          | 277                         | 96.6%            | 90.6%             | 86.6%             | 80.9%             | 75.5%             | 4.30            |
-| GR-1              | 130                         | 94.9%            | 89.6%             | 84.4%             | 78.9%             | 73.1%             | 4.21            |
-| RoboFlamingo      | 1000                        | 96.4%            | 89.6%             | 82.4%             | 74.0%             | 66.0%             | 4.09            |
-| Diff-P-CNN        | 321                         | 86.3%            | 72.7%             | 60.1%             | 51.2%             | 41.7%             | 3.16            |
-| Diff-P-T          | 194                         | 78.3%            | 53.9%             | 33.8%             | 20.4%             | 11.3%             | 1.98            |
+| Train→Test   | Method        | Active Params (Million) | PrT    | 1      | 2      | 3      | 4      | 5      | Avg. Len.        |
+|--------------|---------------|-------------------------|--------|--------|--------|--------|--------|--------|-----------------|
+| ABCD→D       | Diff-P-CNN    | 321                     | ×      | 86.3%  | 72.7%  | 60.1%  | 51.2%  | 41.7%  | 3.16±0.06        |
+| ABCD→D       | Diff-P-T      | 194                     | ×      | 78.3%  | 53.9%  | 33.8%  | 20.4%  | 11.3%  | 1.98±0.09        |
+| ABCD→D       | RoboFlamingo  | 1000                    | ✓      | 96.4%  | 89.6%  | 82.4%  | 74.0%  | 66.0%  | 4.09±0.00        |
+| ABCD→D       | GR-1          | 130                     | ✓      | 94.9%  | 89.6%  | 84.4%  | 78.9%  | 73.1%  | 4.21±0.00        |
+| ABCD→D       | **MoDE**      | 277                     | ×      | 96.6%  | 90.6%  | 86.6%  | 80.9%  | 75.5%  | 4.30±0.02        |
+| ABCD→D       | **MoDE**      | 436                     | ✓      | **97.1%** | **92.5%** | **87.9%** | **83.5%** | **77.9%** | **4.39±0.04** |
+|---------------------------------------------------------------------------------------------------------------------------------|
+|---------------------------------------------------------------------------------------------------------------------------------|
+|---------------------------------------------------------------------------------------------------------------------------------|
+| ABC→D        | Diff-P-CNN    | 321                     | ×      | 63.5%  | 35.3%  | 19.4%  | 10.7%  | 6.4%   | 1.35±0.05        |
+| ABC→D        | Diff-P-T      | 194                     | ×      | 62.2%  | 30.9%  | 13.2%  | 5.0%   | 1.6%   | 1.13±0.02        |
+| ABC→D        | RoboFlamingo  | 1000                    | ✓      | 82.4%  | 61.9%  | 46.6%  | 33.1%  | 23.5%  | 2.47±0.00        |
+| ABC→D        | SuSIE         | 860+                    | ✓      | 87.0%  | 69.0%  | 49.0%  | 38.0%  | 26.0%  | 2.69±0.00        |
+| ABC→D        | GR-1          | 130                     | ✓      | 85.4%  | 71.2%  | 59.6%  | 49.7%  | 40.1%  | 3.06±0.00        |
+| ABC→D        | **MoDE**      | 307                     | ×      | 91.5%  | 79.2%  | 67.3%  | 55.8%  | 45.3%  | 3.39±0.03        |
+| ABC→D        | **MoDE**      | 436                     | ✓      | **96.7%** | **88.6%** | **80.2%** | **70.7%** | **60.9%** | **3.98±0.04** |
 
+<div class="columns is-full is-centered has-text-centered">
+    <div class="column is-four-fifths">
+        <div class="column is-full columns is-centered">
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_0_0.mp4">
+                </video>
+            </div>
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_1_0.mp4">
+                </video>
+            </div>
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_2_0.mp4">
+                </video>
+            </div>
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_3_0.mp4">
+                </video>
+            </div>
+        </div>
+        <div class="column is-full columns is-centered">
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_4_0.mp4">
+                </video>
+            </div>
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_5_0.mp4">
+                </video>
+            </div>
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_6_0.mp4">
+                </video>
+            </div>
+            <div class="column is-quarter">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_7_0.mp4">
+                </video>
+            </div>
+        </div>
+        <!-- <div class="column is-half columns is-centered">
+            <div class="column is-half">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_8_0.mp4">
+                </video>
+            </div>
+            <div class="column is-half">
+                <video width="100%" autoplay muted loop playsinline>
+                    <source src="./static/videos/calvin/long_horizon_sequence_9_0.mp4">
+                </video>
+            </div>
+        </div> -->
+    </div>
+</div>
 
 <!-- ## BibTeX
 
@@ -107,7 +177,7 @@ On the CALVIN benchmark, MoDE achieved exceptional results, excelling at complex
 
 The work presented here was funded by the German Research Foundation (DFG) – 448648559. -->
 
-<!-- ## Related Projects
+## Related Projects
 <h3><a href="https://intuitive-robots.github.io/mdt_policy/">Multimodal Diffusion Transformer: Learning Versatile Behavior from Multimodal Goals</a></h3>
 <div class="column is-full columns">
     <div class="column is-half">
@@ -130,4 +200,4 @@ The work presented here was funded by the German Research Foundation (DFG) – 4
 Using pre-trained vision-language models, NILS detects objects, identifies changes, segments tasks, and annotates behavior datasets. Evaluations on the BridgeV2 and kitchen play datasets demonstrate its effectiveness in annotating diverse, unstructured robot demonstrations while addressing the limitations of traditional human labeling methods.
         </p>
     </div>
-</div> -->
+</div>
