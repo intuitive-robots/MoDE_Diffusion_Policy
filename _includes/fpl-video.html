@@ -2,6 +2,7 @@
     <div id="fpl-videos">
         {% assign calvin_videos = site.static_files | where_exp: "video", "video.path contains 'calvin'" | where: "extname", ".mp4" | sample: 20 %}
         {% assign simpler_videos = site.static_files | where_exp: "video", "video.path contains 'simpler' and video.path contains 'success'" | where: "extname", ".mp4" | sample: 20 %}
+        {% assign libero_videos = site.static_files | where_exp: "video", "video.path contains 'libero'" | where: "extname", ".mp4" | sample: 4 %}
         {% assign all_videos = calvin_videos | concat: simpler_videos %}
         {% assign n = all_videos | size %}
         {% assign videos = all_videos | sample: n %}

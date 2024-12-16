@@ -80,7 +80,23 @@ efficient use of computational resources.
 
 <div class="columns is-centered">
     <div class="column is-four-fifths">
-        <img src="./static/image/libero-fig.png" alt="Libero Results">
+        <img src="./static/image/libero-figv2.png" alt="Libero Results">
+    </div>
+</div>
+
+#### Example Rollouts
+
+<div class="columns is-full is-centered has-text-centered">
+    <div class="column is-full">
+        <div class="grid is-gap-2">
+            {% assign libero_videos = site.static_files | where_exp: "video", "video.path contains 'libero'" | where: "extname", ".mp4" | sample: 4 %}
+            {% for video in libero_videos %}
+                <video autoplay muted loop playsinline>
+                    <source src="{{ video.path | relative_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
@@ -127,32 +143,12 @@ In our experiments on the demanding CALVIN Language-Skills Benchmark, MoDE consi
     </div>
 </div>
 
-## SIMPLER
+## Evaluation on SIMPLER against Octo and OpenVLA
 
-SIMPLER TEXT HERE
+Compared to state-of-the-art models like Octo and OpenVLA on the SIMPLER benchmark, our approach achieves the highest average success rate (26.30%) and the best overall ranking (1.65) across diverse manipulation tasks. It excels at complex challenges, such as drawer manipulation (34.92% success) and precise object interactions (40% success on vertical can picking). While stacking tasks remain challenging, these results underscore its scalable, generalist capabilities and consistently strong performance across a broad range of scenarios.
 
 | Metric                                       | OpenVLA Score | OpenVLA Rank | Octo Base Score | Octo Base Rank | MoDe (ours) Score | MoDe (ours) Rank |
 |----------------------------------------------|---------------|--------------|----------------|----------------|-------------------|-----------------|
-| Drawer Open                                   | **16%**       | **1**        | 0%             | 3              | 4.23%             | 2               |
-| Drawer Close                                  | 20%           | 2            | 2%             | 3              | **34.92%**        | **1**           |
-| Pick Can Horizontal                           | **71%**       | **1**        | 0%             | 3              | 33.78%            | 2               |
-| Pick Can Vertical                             | 27%           | 2            | 0%             | 3              | **29.78%**        | **1**           |
-| Pick Can Standing                             | **65%**       | **1**        | 0%             | 3              | 36.44%            | 2               |
-| Move Near                                     | **48%**       | **1**        | 3%             | 3              | 30%               | 2               |
-| Drawer Open                                   | 19%           | 2            | 1%             | 3              | **21.30%**        | **1**           |
-| Drawer Close                                  | 52%           | 2            | 44%            | 3              | **76.85%**        | **1**           |
-| Pick Can Horizontal                           | **27%**       | **1**        | 21%            | 3              | 22%               | 2               |
-| Pick Can Vertical                             | 3%            | 3            | 21%            | 2              | **40%**           | **1**           |
-| Pick Can Standing                             | 19%           | 2            | 9%             | 3              | **35%**           | **1**           |
-| Move Near                                     | **46%**       | **1**        | 4%             | 3              | 45.42%            | 2               |
-| Partial Put Spoon on Tablecloth               | 4%            | 3            | **35%**         | **1**          | 29.17%            | 2               |
-| Put Spoon on Tablecloth                       | 0%            | 3            | 12%            | **1**          | **12.5%**         | **1**           |
-| Partial Put Carrot on Plate                   | 33%           | 2            | **53%**         | **1**          | 29.17%            | 3               |
-| Put Carrot on Plate                           | 0%            | 3            | 8%             | **1**          | **8.33%**         | 1               |
-| Partial Stack Green Block on Yellow Block     | 12%           | 2            | **32%**         | **1**          | 8.33%             | 3               |
-| Stack Green Block on Yellow Block             | 0%            | 2            | 0%             | 2              | 0%                | 2               |
-| Partial Put Eggplant in Basket                | 8%            | 3            | **67%**         | **1**          | 37.5%             | 2               |
-| Put Eggplant in Basket                        | 4%            | 3            | **43%**         | **1**          | 8.33%             | 2               |
 | **Average**                                   | **23.70%**    | 1.95         | 17.75%          | 2.1            | **26.30%**        | **1.65**         |
 
 #### Example Rollouts
@@ -160,7 +156,14 @@ SIMPLER TEXT HERE
 <div class="columns is-full is-centered has-text-centered">
     <div class="column is-full">
         <div class="grid is-gap-2">
-            {% assign simpler_videos = site.static_files | where_exp: "video", "video.path contains 'simpler' and video.path contains 'success'" | where: "extname", ".mp4" | sample: 8 %}
+            {% assign simpler_videos = site.static_files | where_exp: "video", "video.path contains 'simpler' and video.path contains 'success'" | where: "extname", ".mp4" | sample: 5 %}
+            {% for video in simpler_videos %}
+                <video width="224px" autoplay muted loop playsinline>
+                    <source src="{{ video.path | relative_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% endfor %}
+            {% assign simpler_videos = site.static_files | where_exp: "video", "video.path contains 'simpler' and video.path contains 'bridge' and video.path contains 'success'" | where: "extname", ".mp4" | sample: 3 %}
             {% for video in simpler_videos %}
                 <video width="224px" autoplay muted loop playsinline>
                     <source src="{{ video.path | relative_url }}" type="video/mp4">
