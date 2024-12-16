@@ -1,16 +1,15 @@
 <div id="fpl-perspective">
     <div id="fpl-videos">
-        {% assign n = site.static_files | size %}
-        {% assign videos = site.static_files | sample: n %}
+        {% assign calvin_videos = site.static_files | where_exp: "video", "video.path contains 'calvin'" | where: "extname", ".mp4" | sample: 20 %}
+        {% assign simpler_videos = site.static_files | where_exp: "video", "video.path contains 'simpler' and video.path contains 'success'" | where: "extname", ".mp4" | sample: 20 %}
+        {% assign all_videos = calvin_videos | concat: simpler_videos %}
+        {% assign n = all_videos | size %}
+        {% assign videos = all_videos | sample: n %}
         {% for video in videos %}
-            {% if video.path contains 'calvin' %}
-            {% if video.extname == ".mp4" %}
-            <video width="100%" height="100%" autoplay muted loop playsinline>
+            <video style="max-width: 100%;height: 100%;object-fit: cover;" width="100%" height="100%" autoplay muted loop playsinline>
                 <source src="{{ video.path | relative_url }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            {% endif %}
-            {% endif %}
         {% endfor %}
     </div>
 </div>

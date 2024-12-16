@@ -3,13 +3,13 @@ layout: project_page
 permalink: /
 
 title: "Efficient Diffusion Transformer Policies with Mixture of Expert Denoisers for Multitask Learning"
-authors: <a href="https://mbreuss.github.io/moritzreuss/">Moritz Reuss</a><sup>1</sup>, <a href="https://jyopari.github.io/aboutMe.html">Jyothish Pari</a><sup>1</sup>, <a href="https://people.csail.mit.edu/pulkitag/">Pulkit Agrawal</a><sup>2</sup>, <a href="http://rudolf.intuitive-robots.net/">Rudolf Lioutikov</a><sup>1</sup>
+authors: <a href="https://mbreuss.github.io/">Moritz Reuss</a><sup>1</sup>, <a href="https://jyopari.github.io/aboutMe.html">Jyothish Pari</a><sup>1</sup>, <a href="https://people.csail.mit.edu/pulkitag/">Pulkit Agrawal</a><sup>2</sup>, <a href="http://rudolf.intuitive-robots.net/">Rudolf Lioutikov</a><sup>1</sup>
 affiliations: <sup>1</sup>Intuitive Robots Lab, KIT <sup>2</sup>MIT CSAIL
 # venue: "ICLR 2025"
 # paper: https://arxiv.org/abs/2406.12538
 # video:
-# code: https://github.com/VDD-Anonymous/Variational-Diffusion-Distillation
-# data:
+code: https://github.com/intuitive-robots/MoDE_Diffusion_Policy
+data: https://huggingface.co/collections/mbreuss/mode-6760239f42bc757093b6de13
 title-bg-landing-include: fpl-video.html
 ---
 
@@ -87,83 +87,86 @@ efficient use of computational resources.
 
 In our experiments on the demanding CALVIN Language-Skills Benchmark, MoDE consistently outperforms all baselines. For instance, in the ABCD→D evaluation, MoDE without pretraining achieves a 4.30 average sequence length out of 5 possible tasks, surpassing RoboFlamingo (4.09) and GR-1 (4.21), both of which utilize large-scale pretraining. With pretraining, MoDE reaches an even higher average length of 4.39, setting a new state-of-the-art result. Similarly, in the more challenging ABC→D zero-shot test, MoDE without pretraining achieves an average sequence length of 3.39, substantially improving upon Diff-P-CNN’s 1.35 and GR-1’s 3.06. With pretraining, MoDE achieves an average of 3.98 in the zero-shot scenario, outpacing other methods and demonstrating strong generalization capabilities.
 
-| Train→Test   | Method        | Active Params (Million) | PrT    | 1      | 2      | 3      | 4      | 5      | Avg. Len.        |
-|--------------|---------------|-------------------------|--------|--------|--------|--------|--------|--------|-----------------|
-| ABCD→D       | Diff-P-CNN    | 321                     | ×      | 86.3%  | 72.7%  | 60.1%  | 51.2%  | 41.7%  | 3.16±0.06        |
-| ABCD→D       | Diff-P-T      | 194                     | ×      | 78.3%  | 53.9%  | 33.8%  | 20.4%  | 11.3%  | 1.98±0.09        |
-| ABCD→D       | RoboFlamingo  | 1000                    | ✓      | 96.4%  | 89.6%  | 82.4%  | 74.0%  | 66.0%  | 4.09±0.00        |
-| ABCD→D       | GR-1          | 130                     | ✓      | 94.9%  | 89.6%  | 84.4%  | 78.9%  | 73.1%  | 4.21±0.00        |
-| ABCD→D       | **MoDE**      | 277                     | ×      | 96.6%  | 90.6%  | 86.6%  | 80.9%  | 75.5%  | 4.30±0.02        |
-| ABCD→D       | **MoDE**      | 436                     | ✓      | **97.1%** | **92.5%** | **87.9%** | **83.5%** | **77.9%** | **4.39±0.04** |
-|---------------------------------------------------------------------------------------------------------------------------------|
-|---------------------------------------------------------------------------------------------------------------------------------|
-|---------------------------------------------------------------------------------------------------------------------------------|
-| ABC→D        | Diff-P-CNN    | 321                     | ×      | 63.5%  | 35.3%  | 19.4%  | 10.7%  | 6.4%   | 1.35±0.05        |
-| ABC→D        | Diff-P-T      | 194                     | ×      | 62.2%  | 30.9%  | 13.2%  | 5.0%   | 1.6%   | 1.13±0.02        |
-| ABC→D        | RoboFlamingo  | 1000                    | ✓      | 82.4%  | 61.9%  | 46.6%  | 33.1%  | 23.5%  | 2.47±0.00        |
-| ABC→D        | SuSIE         | 860+                    | ✓      | 87.0%  | 69.0%  | 49.0%  | 38.0%  | 26.0%  | 2.69±0.00        |
-| ABC→D        | GR-1          | 130                     | ✓      | 85.4%  | 71.2%  | 59.6%  | 49.7%  | 40.1%  | 3.06±0.00        |
-| ABC→D        | **MoDE**      | 307                     | ×      | 91.5%  | 79.2%  | 67.3%  | 55.8%  | 45.3%  | 3.39±0.03        |
-| ABC→D        | **MoDE**      | 436                     | ✓      | **96.7%** | **88.6%** | **80.2%** | **70.7%** | **60.9%** | **3.98±0.04** |
+#### Results on ABC→D
+
+| Method        | Active Params (Million) | PrT    | 1      | 2      | 3      | 4      | 5      | Avg. Len.        |
+|---------------|-------------------------|--------|--------|--------|--------|--------|--------|-----------------|
+| Diff-P-CNN    | 321                     | ×      | 63.5%  | 35.3%  | 19.4%  | 10.7%  | 6.4%   | 1.35±0.05        |
+| Diff-P-T      | 194                     | ×      | 62.2%  | 30.9%  | 13.2%  | 5.0%   | 1.6%   | 1.13±0.02        |
+| RoboFlamingo  | 1000                    | ✓      | 82.4%  | 61.9%  | 46.6%  | 33.1%  | 23.5%  | 2.47±0.00        |
+| SuSIE         | 860+                    | ✓      | 87.0%  | 69.0%  | 49.0%  | 38.0%  | 26.0%  | 2.69±0.00        |
+| GR-1          | 130                     | ✓      | 85.4%  | 71.2%  | 59.6%  | 49.7%  | 40.1%  | 3.06±0.00        |
+| **MoDE**      | 307                     | ×      | 91.5%  | 79.2%  | 67.3%  | 55.8%  | 45.3%  | 3.39±0.03        |
+| **MoDE**      | 436                     | ✓      | **96.7%** | **88.6%** | **80.2%** | **70.7%** | **60.9%** | **3.98±0.04** |
+
+#### Results on ABCD→D
+
+| Method        | Active Params (Million) | PrT    | 1      | 2      | 3      | 4      | 5      | Avg. Len.        |
+|---------------|-------------------------|--------|--------|--------|--------|--------|--------|-----------------|
+| Diff-P-CNN    | 321                     | ×      | 86.3%  | 72.7%  | 60.1%  | 51.2%  | 41.7%  | 3.16±0.06        |
+| Diff-P-T      | 194                     | ×      | 78.3%  | 53.9%  | 33.8%  | 20.4%  | 11.3%  | 1.98±0.09        |
+| RoboFlamingo  | 1000                    | ✓      | 96.4%  | 89.6%  | 82.4%  | 74.0%  | 66.0%  | 4.09±0.00        |
+| GR-1          | 130                     | ✓      | 94.9%  | 89.6%  | 84.4%  | 78.9%  | 73.1%  | 4.21±0.00        |
+| **MoDE**      | 277                     | ×      | 96.6%  | 90.6%  | 86.6%  | 80.9%  | 75.5%  | 4.30±0.02        |
+| **MoDE**      | 436                     | ✓      | **97.1%** | **92.5%** | **87.9%** | **83.5%** | **77.9%** | **4.39±0.04** |
+
+#### Example Rollouts
 
 <div class="columns is-full is-centered has-text-centered">
-    <div class="column is-four-fifths">
-        <div class="column is-full columns is-centered">
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_0_0.mp4">
+    <div class="column is-full">
+        <div class="grid is-gap-2">
+            {% assign calvin_videos = site.static_files | where_exp: "video", "video.path contains 'calvin'" | where: "extname", ".mp4" | sample: 8 %}
+            {% for video in calvin_videos %}
+                <video autoplay muted loop playsinline>
+                    <source src="{{ video.path | relative_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
                 </video>
-            </div>
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_1_0.mp4">
-                </video>
-            </div>
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_2_0.mp4">
-                </video>
-            </div>
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_3_0.mp4">
-                </video>
-            </div>
+            {% endfor %}
         </div>
-        <div class="column is-full columns is-centered">
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_4_0.mp4">
+    </div>
+</div>
+
+## SIMPLER
+
+SIMPLER TEXT HERE
+
+| Metric                                       | OpenVLA Score | OpenVLA Rank | Octo Base Score | Octo Base Rank | MoDe (ours) Score | MoDe (ours) Rank |
+|----------------------------------------------|---------------|--------------|----------------|----------------|-------------------|-----------------|
+| Drawer Open                                   | **16%**       | **1**        | 0%             | 3              | 4.23%             | 2               |
+| Drawer Close                                  | 20%           | 2            | 2%             | 3              | **34.92%**        | **1**           |
+| Pick Can Horizontal                           | **71%**       | **1**        | 0%             | 3              | 33.78%            | 2               |
+| Pick Can Vertical                             | 27%           | 2            | 0%             | 3              | **29.78%**        | **1**           |
+| Pick Can Standing                             | **65%**       | **1**        | 0%             | 3              | 36.44%            | 2               |
+| Move Near                                     | **48%**       | **1**        | 3%             | 3              | 30%               | 2               |
+| Drawer Open                                   | 19%           | 2            | 1%             | 3              | **21.30%**        | **1**           |
+| Drawer Close                                  | 52%           | 2            | 44%            | 3              | **76.85%**        | **1**           |
+| Pick Can Horizontal                           | **27%**       | **1**        | 21%            | 3              | 22%               | 2               |
+| Pick Can Vertical                             | 3%            | 3            | 21%            | 2              | **40%**           | **1**           |
+| Pick Can Standing                             | 19%           | 2            | 9%             | 3              | **35%**           | **1**           |
+| Move Near                                     | **46%**       | **1**        | 4%             | 3              | 45.42%            | 2               |
+| Partial Put Spoon on Tablecloth               | 4%            | 3            | **35%**         | **1**          | 29.17%            | 2               |
+| Put Spoon on Tablecloth                       | 0%            | 3            | 12%            | **1**          | **12.5%**         | **1**           |
+| Partial Put Carrot on Plate                   | 33%           | 2            | **53%**         | **1**          | 29.17%            | 3               |
+| Put Carrot on Plate                           | 0%            | 3            | 8%             | **1**          | **8.33%**         | 1               |
+| Partial Stack Green Block on Yellow Block     | 12%           | 2            | **32%**         | **1**          | 8.33%             | 3               |
+| Stack Green Block on Yellow Block             | 0%            | 2            | 0%             | 2              | 0%                | 2               |
+| Partial Put Eggplant in Basket                | 8%            | 3            | **67%**         | **1**          | 37.5%             | 2               |
+| Put Eggplant in Basket                        | 4%            | 3            | **43%**         | **1**          | 8.33%             | 2               |
+| **Average**                                   | **23.70%**    | 1.95         | 17.75%          | 2.1            | **26.30%**        | **1.65**         |
+
+#### Example Rollouts
+
+<div class="columns is-full is-centered has-text-centered">
+    <div class="column is-full">
+        <div class="grid is-gap-2">
+            {% assign simpler_videos = site.static_files | where_exp: "video", "video.path contains 'simpler' and video.path contains 'success'" | where: "extname", ".mp4" | sample: 8 %}
+            {% for video in simpler_videos %}
+                <video width="224px" autoplay muted loop playsinline>
+                    <source src="{{ video.path | relative_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
                 </video>
-            </div>
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_5_0.mp4">
-                </video>
-            </div>
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_6_0.mp4">
-                </video>
-            </div>
-            <div class="column is-quarter">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_7_0.mp4">
-                </video>
-            </div>
+            {% endfor %}
         </div>
-        <!-- <div class="column is-half columns is-centered">
-            <div class="column is-half">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_8_0.mp4">
-                </video>
-            </div>
-            <div class="column is-half">
-                <video width="100%" autoplay muted loop playsinline>
-                    <source src="./static/videos/calvin/long_horizon_sequence_9_0.mp4">
-                </video>
-            </div>
-        </div> -->
     </div>
 </div>
 
@@ -207,3 +210,16 @@ Using pre-trained vision-language models, NILS detects objects, identifies chang
         </p>
     </div>
 </div>
+
+<h3><a href="https://arxiv.org/pdf/2411.02207">Collective Model Intelligence Requires Compatible Specialization</a></h3>
+<div class="column is-full columns">
+    <div class="column is-half">
+        <img src="./static/image/cka-ow.png" alt="cka? Overview">
+    </div>
+    <div class="column is-half">
+        <p>
+This work highlights the limitations of current model merging methods, like feature averaging, due to representational divergence during fine-tuning, which reduces merging effectiveness. Using CKA, the authors show that as models specialize, their internal representations become increasingly incompatible. Routing-based strategies improve merging but remain limited by these incompatibilities.
+        </p>
+    </div>
+</div>
+
