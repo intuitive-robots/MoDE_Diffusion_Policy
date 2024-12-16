@@ -39,6 +39,7 @@ architectures for Diffusion Policies.
     </div>
 </div>
 
+
 ## Method Overview
 
 <div class="columns is-centered">
