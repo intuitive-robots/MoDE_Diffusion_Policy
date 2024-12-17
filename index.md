@@ -19,22 +19,15 @@ title-bg-landing-include: fpl-video.html
         <div class="content has-text-justified">
 Diffusion Policies have become widely used in Imitation Learning, offering several
 appealing properties, such as generating multimodal and discontinuous behavior.
-As models are becoming larger to capture more complex capabilities, their compu-
-tational demands increase, as shown by recent scaling laws. Therefore, continuing
-with the current architectures will present a computational roadblock. To address
-this gap, we propose Mixture-of-Denoising Experts (MoDE) as a novel policy for
-Imitation Learning. MoDE surpasses current state-of-the-art Transformer-based
-Diffusion Policies while enabling parameter-efficient scaling, reducing the infer-
-ence cost significantly. To achieve this, MoDE uses sparse experts combined with a
-novel routing strategy that conditions the expert selection on the current noise level
-of the denoising process. This is combined with a noise-conditioned self-attention
-mechanism for further improvements. MoDE achieves state-of-the-art performance
-across 134 tasks in four established imitation learning benchmarks (CALVIN and
-LIBERO). It surpasses both CNN-based and Transformer Diffusion Policies by
-an average of 20% in all settings, while using 40% fewer FLOPs and fewer ac-
-tive parameters. Furthermore, we conduct comprehensive ablations on MoDE’s
-components, providing insights for designing efficient and scalable Transformer
-architectures for Diffusion Policies.
+As models are becoming larger to capture more complex capabilities, their computational demands increase, as shown by recent scaling laws. 
+Therefore, continuing with the current architectures will present a computational roadblock. 
+To address this gap, we propose Mixture-of-Denoising Experts (MoDE) as a novel policy for Imitation Learning.
+MoDE surpasses current state-of-the-art Transformer-based Diffusion Policies while enabling parameter-efficient scaling through sparse experts and noise-conditioned routing, reducing both active parameters by 40% and inference costs by 80% via expert caching.
+Our architecture combines this efficient scaling with noise-conditioned self-attention mechanism, enabling more effective denoising across different noise levels. 
+MoDE achieves state-of-the-art performance across 134 tasks in four established imitation learning benchmarks (CALVIN and LIBERO).
+Notably, by pretraining MoDE on diverse robotics data, we achieve a new state-of-the-art result of 3.98 on CALVIN and 0.95 on LIBERO-90.
+It surpasses both CNN-based and Transformer Diffusion Policies by an average of 20% in all settings, while using 80% fewer FLOPs and fewer active parameters.
+Furthermore, we conduct comprehensive ablations on MoDE's components, providing insights for designing efficient and scalable Transformer architectures for Diffusion Policies.
         </div>
     </div>
 </div>
