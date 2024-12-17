@@ -25,7 +25,7 @@ To address this gap, we propose Mixture-of-Denoising Experts (MoDE) as a novel p
 MoDE surpasses current state-of-the-art Transformer-based Diffusion Policies while enabling parameter-efficient scaling through sparse experts and noise-conditioned routing, reducing both active parameters by 40% and inference costs by 80% via expert caching.
 Our architecture combines this efficient scaling with noise-conditioned self-attention mechanism, enabling more effective denoising across different noise levels. 
 MoDE achieves state-of-the-art performance across 134 tasks in four established imitation learning benchmarks (CALVIN and LIBERO).
-Notably, by pretraining MoDE on diverse robotics data, we achieve a new state-of-the-art result of 3.98 on CALVIN and 0.95 on LIBERO-90.
+Notably, by pretraining MoDE on diverse robotics data, we achieve a new state-of-the-art result of 4.01 on CALVIN and 0.95 on LIBERO-90.
 It surpasses both CNN-based and Transformer Diffusion Policies by an average of 20% in all settings, while using 80% fewer FLOPs and fewer active parameters.
 Furthermore, we conduct comprehensive ablations on MoDE's components, providing insights for designing efficient and scalable Transformer architectures for Diffusion Policies.
         </div>
@@ -107,7 +107,7 @@ In our experiments on the demanding CALVIN Language-Skills Benchmark, MoDE consi
 | SuSIE         | 860+                    | ✓      | 87.0%  | 69.0%  | 49.0%  | 38.0%  | 26.0%  | 2.69±0.00        |
 | GR-1          | 130                     | ✓      | 85.4%  | 71.2%  | 59.6%  | 49.7%  | 40.1%  | 3.06±0.00        |
 | **MoDE**      | 307                     | ×      | 91.5%  | 79.2%  | 67.3%  | 55.8%  | 45.3%  | 3.39±0.03        |
-| **MoDE**      | 436                     | ✓      | **96.7%** | **88.6%** | **80.2%** | **70.7%** | **60.9%** | **3.98±0.04** |
+| **MoDE**      | 436                     | ✓      | **96.2%** | **88.9%** | **81.1%** | **71.8%** | **63.5%** | **4.01±0.04** |
 
 #### Results on ABCD→D
 
