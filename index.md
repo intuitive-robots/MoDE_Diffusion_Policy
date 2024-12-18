@@ -6,7 +6,7 @@ title: "Efficient Diffusion Transformer Policies with Mixture of Expert Denoiser
 authors: <a href="https://mbreuss.github.io/">Moritz Reuss</a><sup>1</sup>, <a href="https://jyopari.github.io/aboutMe.html">Jyothish Pari</a><sup>1</sup>, <a href="https://people.csail.mit.edu/pulkitag/">Pulkit Agrawal</a><sup>2</sup>, <a href="http://rudolf.intuitive-robots.net/">Rudolf Lioutikov</a><sup>1</sup>
 affiliations: <sup>1</sup>Intuitive Robots Lab, KIT <sup>2</sup>MIT CSAIL
 # venue: "ICLR 2025"
-# paper: https://arxiv.org/abs/2406.12538
+paper: https://arxiv.org/abs/2412.12953
 # video:
 code: https://github.com/intuitive-robots/MoDE_Diffusion_Policy
 data: https://huggingface.co/collections/mbreuss/mode-6760239f42bc757093b6de13
@@ -168,12 +168,13 @@ Compared to state-of-the-art models like Octo and OpenVLA on the SIMPLER benchma
 <!-- ## BibTeX
 
 ```bibtex
-@inproceedings{
-    reuss2023goal,
-    title={Goal Conditioned Imitation Learning using Score-based Diffusion Policies},
-    author={Reuss, Moritz and Li, Maximilian and Jia, Xiaogang and Lioutikov, Rudolf},
-    booktitle={Robotics: Science and Systems},
-    year={2023}
+@misc{reuss2024efficient,
+    title={Efficient Diffusion Transformer Policies with Mixture of Expert Denoisers for Multitask Learning},
+    author={Moritz Reuss and Jyothish Pari and Pulkit Agrawal and Rudolf Lioutikov},
+    year={2024},
+    eprint={2412.12953},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG}
 }
 ``` -->
 
