@@ -21,11 +21,11 @@ Diffusion Policies have become widely used in Imitation Learning, offering sever
 As models are becoming larger to capture more complex capabilities, their computational demands increase, as shown by recent scaling laws. 
 Therefore, continuing with the current architectures will present a computational roadblock. 
 To address this gap, we propose Mixture-of-Denoising Experts (MoDE) as a novel policy for Imitation Learning.
-MoDE surpasses current state-of-the-art Transformer-based Diffusion Policies while enabling parameter-efficient scaling through sparse experts and noise-conditioned routing, reducing both active parameters by 40\% and inference costs by 90\% via expert caching.
+MoDE surpasses current state-of-the-art Transformer-based Diffusion Policies while enabling parameter-efficient scaling through sparse experts and noise-conditioned routing, reducing both active parameters by $40\%$ and inference costs by $90\%$ via expert caching.
 Our architecture combines this efficient scaling with noise-conditioned self-attention mechanism, enabling more effective denoising across different noise levels. 
 MoDE achieves state-of-the-art performance on 134 tasks in four established imitation learning benchmarks (CALVIN and LIBERO). 
 Notably, by pretraining MoDE on diverse robotics data, we achieve 4.01 on CALVIN ABC and 0.95 on LIBERO-90. 
-It surpasses both CNN-based and Transformer Diffusion Policies by an average of $57\%$ across 4 benchmarks, while using 90\% fewer FLOPs and fewer active parameters compared to default Diffusion Transformer architectures. Furthermore, we conduct comprehensive ablations on MoDE's components, providing insights for designing efficient and scalable Transformer architectures for Diffusion Policies.
+It surpasses both CNN-based and Transformer Diffusion Policies by an average of $57\%$ across 4 benchmarks, while using 90% fewer FLOPs and fewer active parameters compared to default Diffusion Transformer architectures. Furthermore, we conduct comprehensive ablations on MoDE's components, providing insights for designing efficient and scalable Transformer architectures for Diffusion Policies.
         </div>
     </div>
 </div>
@@ -165,18 +165,64 @@ Compared to state-of-the-art models like Octo and OpenVLA on the SIMPLER benchma
     </div>
 </div>
 
-<!-- ## BibTeX
-
-```bibtex
-@misc{reuss2024efficient,
+<!DOCTYPE html>
+<div class="citation-container">
+  <h2>Citation</h2>
+  <pre class="bibtex-citation">@misc{reuss2024efficient,
     title={Efficient Diffusion Transformer Policies with Mixture of Expert Denoisers for Multitask Learning},
     author={Moritz Reuss and Jyothish Pari and Pulkit Agrawal and Rudolf Lioutikov},
     year={2024},
     eprint={2412.12953},
     archivePrefix={arXiv},
     primaryClass={cs.LG}
-}
-``` -->
+}</pre>
+  <button class="copy-button" onclick="navigator.clipboard.writeText(document.querySelector('.bibtex-citation').innerText)">
+    Copy BibTeX
+  </button>
+  <style>
+    .citation-container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .citation-container h2 {
+      margin-top: 0;
+      color: #333;
+      font-size: 1.5em;
+    }
+    
+    .bibtex-citation {
+      background: #fff;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #e1e4e8;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 15px 0;
+    }
+    
+    .copy-button {
+      background: #0366d6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    
+    .copy-button:hover {
+      background: #0255b3;
+    }
+  </style>
+</div>
 
 <!-- ## Acknowledgements
 
