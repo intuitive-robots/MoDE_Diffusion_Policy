@@ -166,9 +166,10 @@ Compared to state-of-the-art models like Octo and OpenVLA on the SIMPLER benchma
 </div>
 
 <!DOCTYPE html>
-<div class="citation-container">
+<div class="citation-section">
   <h2>Citation</h2>
-  <pre class="bibtex-citation">@misc{reuss2024efficient,
+  <div class="citation-container">
+    <pre class="bibtex-citation">@misc{reuss2024efficient,
     title={Efficient Diffusion Transformer Policies with Mixture of Expert Denoisers for Multitask Learning},
     author={Moritz Reuss and Jyothish Pari and Pulkit Agrawal and Rudolf Lioutikov},
     year={2024},
@@ -176,52 +177,63 @@ Compared to state-of-the-art models like Octo and OpenVLA on the SIMPLER benchma
     archivePrefix={arXiv},
     primaryClass={cs.LG}
 }</pre>
-  <button class="copy-button" onclick="navigator.clipboard.writeText(document.querySelector('.bibtex-citation').innerText)">
-    Copy BibTeX
-  </button>
+    <button class="copy-button">Copy BibTeX</button>
+  </div>
   <style>
-    .citation-container {
+    .citation-section {
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
       background: #f8f9fa;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .citation-container h2 {
-      margin-top: 0;
-      color: #333;
-      font-size: 1.5em;
+    .citation-section h2 {
+      margin: 0 0 15px 0;
+      font-size: 24px;
+      font-weight: normal;
+    }
+    
+    .citation-container {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 15px;
     }
     
     .bibtex-citation {
-      background: #fff;
-      padding: 15px;
-      border-radius: 4px;
-      border: 1px solid #e1e4e8;
-      font-family: 'Consolas', 'Monaco', monospace;
+      font-family: monospace;
       font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
       white-space: pre-wrap;
       word-wrap: break-word;
-      margin: 15px 0;
+      border: none;
+      background: transparent;
     }
     
     .copy-button {
-      background: #0366d6;
+      display: block;
+      margin-top: 15px;
+      padding: 8px 16px;
+      background-color: #0d6efd;
       color: white;
       border: none;
-      padding: 8px 16px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
-      transition: background 0.2s;
     }
     
     .copy-button:hover {
-      background: #0255b3;
+      background-color: #0b5ed7;
     }
   </style>
+  <script>
+    document.querySelector('.copy-button').addEventListener('click', function() {
+      navigator.clipboard.writeText(document.querySelector('.bibtex-citation').innerText);
+    });
+  </script>
 </div>
 
 <!-- ## Acknowledgements
