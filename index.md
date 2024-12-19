@@ -165,7 +165,7 @@ Compared to state-of-the-art models like Octo and OpenVLA on the SIMPLER benchma
     </div>
 </div>
 
-<!DOCTYPE html>
+
 <div class="citation-section">
   <h2>Citation</h2>
   <div class="citation-container">
