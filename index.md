@@ -80,7 +80,7 @@ efficient use of computational resources.
 <div class="columns is-full is-centered has-text-centered">
     <div class="column is-full">
         <div class="grid is-gap-2">
-            {% assign libero_videos = site.static_files | where_exp: "video", "video.path contains 'libero'" | where: "extname", ".mp4" | sample: 4 %}
+            {% assign libero_videos = site.static_files | where: "extname", ".mp4" | where_exp: "file", "file.path contains 'libero'" | sample: 4 %}
             {% for video in libero_videos %}
                 <video autoplay muted loop playsinline>
                     <source src="{{ video.path | relative_url }}" type="video/mp4">
